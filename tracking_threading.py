@@ -6,7 +6,6 @@ import threading
 import time
 import json
 import numpy as np
-from turn_table_functions import *
 
 def read_nmea1803():
     global ser_lat
@@ -20,7 +19,7 @@ def read_nmea1803():
                 msg = pynmea2.parse(msg)
                 if msg.lat=='' or msg.lon=='':
                     print("no GPS data")
-                    break
+                    continue
                 ser_lat = float(msg.lat[0:2])+float(msg.lat[2:])/60.
                 ser_lon = float(msg.lon[0:3])+float(msg.lon[3:])/60.
                 ser_alt = float(msg.altitude)+float(msg.geo_sep)
@@ -58,7 +57,6 @@ if __name__ == '__main__':
     turn_table_ser.baudrate = 9600
     turn_table_ser.port = "/dev/tty.usbserial-00000000"
     turn_table_ser.open()
-    move = move_class(turn_table_ser)
     
     ser_lat = 0.0
     ser_lon = 0.0

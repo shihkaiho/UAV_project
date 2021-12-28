@@ -4,7 +4,7 @@ import pynmea2
 ser = serial.Serial()
 ser.baudrate = 9600
 #ser.port = '/dev/tty.usbmodem141401'
-ser.port = '/dev/tty.usbmodem142301'
+ser.port = '/dev/tty.usbmodem141201'
 ser.open()
 R = 6378137
 while True:
