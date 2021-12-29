@@ -44,11 +44,11 @@ def read_serial():
             uav_lat = float(data["lat"])
             uav_lon = float(data["lon"])
             uav_alt = float(data["alt"])
-            uav_pitch = float(data["pitch"])
-            uav_yaw = float(data["yaw"])
-            uav_roll = float(data["roll"])
+            #uav_pitch = float(data["pitch"])
+            #uav_yaw = float(data["yaw"])
+            #uav_roll = float(data["roll"])
             amp = float(data["amp"])
-            index = float(data["index"])
+            index = int(data["index"])
         except:
             pass
             
@@ -57,7 +57,7 @@ if __name__ == '__main__':
     #open gps port
     local_gps_ser = serial.Serial()
     local_gps_ser.baudrate = 9600
-    local_gps_ser.port = '/dev/tty.usbmodem141401'
+    local_gps_ser.port = '/dev/tty.usbmodem141201'
     local_gps_ser.open()
     #open LoRa port
     remote_gps_ser = serial.Serial()
@@ -75,8 +75,10 @@ if __name__ == '__main__':
     uav_pitch = 0.0
     uav_yaw = 0.0
     uav_roll = 0.0
-    amp = 0.0
     index = 0
+    amp = 0.0
+    last_index = 0
+    AOA = 0
     R = 6378137
     #start threading
     t_ser = threading.Thread(target=read_nmea1803, name='T1')
@@ -85,6 +87,12 @@ if __name__ == '__main__':
     t_uav.start()
     
     while(1):
+        if last_index == index:
+            time.sleep(0.3)
+            continue
+        else:
+            last_index = index
+            pass
         print("Index: "+str(index))
         print("UAV lat: "+str(uav_lat))
         print("DUT lat: "+str(ser_lat))
@@ -96,17 +104,31 @@ if __name__ == '__main__':
         print("delta x: "+str(delta_x))
         print("delta y:"+str(delta_y))
         print("delta z:"+str(delta_z))
-        print("D: " +str(np.sqrt(delta_x**2+delta_y**2)))
-        print("UAV pitch: "+str(uav_pitch))     
-        print("UAV yaw: "+str(uav_yaw))
-        print("UAV roll: "+str(uav_roll))
-        print("amplitude: "+str(amp))
-        #data_temp = {"index":index,"uav_lat":uav_lat,"ser_lat"}
-        
-        
+        D = np.sqrt(delta_x**2+delta_y**2)
+        print("D: " +str(D))
+        #print("UAV pitch: "+str(uav_pitch))     
+        #print("UAV yaw: "+str(uav_yaw))
+        #print("UAV roll: "+str(uav_roll))
+        print("amplitude: "+str(amp))      
         if delta_x != 0 and delta_y != 0:
-            print("AOA: "+str(np.arctan(delta_y/delta_x)/np.pi*180))
+            AOA = np.arctan(delta_y/delta_x)/np.pi*180
+            print("AOA: "+str(AOA))
         else:
             print("Can not compute AOA!")
+        data_temp = {"index":index
+             ,"uav_lat":uav_lat
+             ,"ser_lat":ser_lat
+             ,"uav_lon":uav_lon
+             ,"ser_lon":ser_lon
+             ,"delta_x":delta_x
+             ,"delta_y":delta_y
+             ,"delta_z":delta_z
+             ,"D":D
+             ,"amp":amp
+             ,"AOA":AOA}
+        data_raw = json.dumps(data_temp)
+        with open("data.txt","a") as f:
+            f.write(data_raw+"\n")
+        
         print("============")
-        time.sleep(1)
+        time.sleep(0.3)

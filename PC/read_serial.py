@@ -6,7 +6,7 @@ import json
 import serial
 remote_gps_ser = serial.Serial()
 remote_gps_ser.baudrate = 9600
-remote_gps_ser.port = '/dev/tty.usbmodem142301'
+remote_gps_ser.port = '/dev/tty.usbmodem141301'
 remote_gps_ser.open()
 
 while True:
